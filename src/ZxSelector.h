@@ -1453,12 +1453,14 @@ public :
 private:
 
 	// Histograms
-	ZbPlots* h_zee_jet;		// Z mass from e+e- (l-jet)
-	ZbPlots* h_zmm_jet;		// Z mass from mu+mu- (l-jet)
+	ZbPlots* h_zee_jet;		// Z mass from e+e- (all jet)
+	ZbPlots* h_zmm_jet;		// Z mass from mu+mu- (all jet)
 	ZbPlots* h_zee_bjet;	// .
 	ZbPlots* h_zmm_bjet;	// .
 	ZbPlots* h_zee_cjet;	// .
 	ZbPlots* h_zmm_cjet;	// etc.
+	ZbPlots* h_zee_ljet;
+	ZbPlots* h_zmm_ljet;
 
 	EffPlots* h_eff_b;		// efficiency b-jets
 	EffPlots* h_eff_c;		// efficiency c-jets

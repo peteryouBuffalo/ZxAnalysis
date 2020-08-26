@@ -33,10 +33,12 @@ void ZxSelector::SlaveBegin(TTree * /*tree*/)
 	h_zee_jet = new ZbPlots("Zee_jet");
 	h_zee_bjet = new ZbPlots("Zee_bjet");
 	h_zee_cjet = new ZbPlots("Zee_cjet");
+	h_zee_ljet = new ZbPlots("Zee_ljet");
 
 	h_zmm_jet = new ZbPlots("Zmm_jet");
 	h_zmm_bjet = new ZbPlots("Zmm_bjet");
 	h_zmm_cjet = new ZbPlots("Zmm_cjet");
+	h_zmm_ljet = new ZbPlots("Zmm_ljet");
 
 	unsigned nBins = 9;
 	float bins[10] = {20, 30, 50, 70, 100, 140, 200, 300, 600, 1000};
@@ -69,6 +71,12 @@ void ZxSelector::SlaveBegin(TTree * /*tree*/)
 	tmp = h_zmm_jet->returnHisto();
 	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
 
+	tmp = h_zee_ljet->returnHisto();
+	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
+
+	tmp = h_zmm_ljet->returnHisto();
+	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
+
 	tmp = h_zee_bjet->returnHisto();
 	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
 
@@ -76,6 +84,9 @@ void ZxSelector::SlaveBegin(TTree * /*tree*/)
 	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
 
 	tmp = h_zee_cjet->returnHisto();
+	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
+
+	tmp = h_zmm_cjet->returnHisto();
 	for (size_t i = 0; i < tmp.size(); ++i) GetOutputList()->Add(tmp[i]);
 
 	tmp = h_eff_b->returnHisto();
@@ -206,6 +217,7 @@ Bool_t ZxSelector::Process(Long64_t entry)
 	std::vector<JetObj> jets;
 	std::vector<JetObj> jets_elec_removal;
 	std::vector<JetObj> bjets;
+	std::vector<JetObj> ljets;
 	std::vector<JetObj> cjets;
 
 	float btagM_cut = CUTS.Get<float>("jet_deepCSVM_2016");
@@ -240,6 +252,7 @@ Bool_t ZxSelector::Process(Long64_t entry)
 		jets.push_back(jet);
 		if (jetFlav == 5) bjets.push_back(jet);
 		if (jetFlav == 4) cjets.push_back(jet);
+		if (jetFlav <= 3) ljets.push_back(jet);
 	}
 
 	//====== Calculate SF for electron, muon, & b-tagging ======
@@ -293,7 +306,15 @@ Bool_t ZxSelector::Process(Long64_t entry)
 					//tagging efficiency
 					//Fill_btagEffi(jets,zee_w);
 				}
+				
+				// if we have at least one l-tagged jet
+				if (ljets.size() >= 1) {
+				
+					h_zee_ljet->Fill(Z, ljets[0], zeeb_w);
+					h_zee_ljet->FillMet(*MET_pt, *PuppiMET_pt, zeeb_w);
 
+				}	
+				
 				// if we have at least one b-tagged jet
 				h_zee_bjet->FillNjet(bjets.size(), zeeb_w);
 				if (bjets.size() >= 1) {
@@ -354,6 +375,13 @@ Bool_t ZxSelector::Process(Long64_t entry)
 					h_dR_jm->Fill(std::min(deltaRmuonlep0, deltaRmuonlep1), zmm_w);
 					//Fill_btagEffi(jets,zmm_w);
 				}//end-one-jet
+
+				// if we have at least one l-jet
+				if (ljets.size() >= 1)
+				{
+					h_zmm_ljet->Fill(Z, bjets[0], zmmb_w);
+					h_zmm_ljet->FillMet(*MET_pt, *PuppiMET_pt, zmmb_w);
+				}
 
 				// if we have at least one b-jet
 				if (bjets.size() >= 1)
