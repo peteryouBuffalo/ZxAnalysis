@@ -126,9 +126,14 @@ void ZxSelector::SlaveBegin(TTree * /*tree*/)
 //=============================================================================
 Bool_t ZxSelector::Process(Long64_t entry)
 {
-   
-   fReader.SetLocalEntry(entry);
-   GetEntry(entry);
+	//std::cout << "Entering ZxSelector Processing..." << std::endl; 
+  
+   	fReader.SetLocalEntry(entry);
+ 	GetEntry(entry);
+
+	++TotalEvent;
+	if (TotalEvent % 10000 == 0)
+		std::cout << "Entry #" << TotalEvent << std::endl;
 
 	float genW = 1.;
 	if (*genWeight < 0) genW = -1;
@@ -255,6 +260,8 @@ Bool_t ZxSelector::Process(Long64_t entry)
 		if (jetFlav <= 3) ljets.push_back(jet);
 	}
 
+	//std::cout << "Got past the event build..." << std::endl;
+
 	//====== Calculate SF for electron, muon, & b-tagging ======
 	float elecSF_w(1.);
 	float muonSF_w(1.);
@@ -338,11 +345,14 @@ Bool_t ZxSelector::Process(Long64_t entry)
 		}//end-if
 	}//end-elec-trigger
 
+	//std::cout << "Got past the electron trigger section" << std::endl;
+
 	//===== Check the Zmm + jets events =====
 	h_zmm_cutflow->Fill(1);	// all events (not cut)
 
 	if (muonTrig)
 	{
+		//std::cout << "Inside the muon trigger method" << std::endl;
 		h_zmm_cutflow->Fill(2);
 		if (muons.size() >= 2 && muons[0].m_lvec.Pt() >= CUTS.Get<float>("lep_pt0"))
 		{
@@ -353,6 +363,7 @@ Bool_t ZxSelector::Process(Long64_t entry)
 
 			ZObj Z(muons[0], muons[1]);
 
+			//std::cout << "About to check the Z mass cut" << std::endl;
 			h_Zmm_ZmassFull->Fill(Z.m_lvec.M(), zmm_w);
 			if (Z.m_lvec.M() >= CUTS.Get<float>("ZMassL") &&
 				Z.m_lvec.M() <= CUTS.Get<float>("ZMassH"))
@@ -375,13 +386,14 @@ Bool_t ZxSelector::Process(Long64_t entry)
 					h_dR_jm->Fill(std::min(deltaRmuonlep0, deltaRmuonlep1), zmm_w);
 					//Fill_btagEffi(jets,zmm_w);
 				}//end-one-jet
-
+		
 				// if we have at least one l-jet
 				if (ljets.size() >= 1)
 				{
-					h_zmm_ljet->Fill(Z, bjets[0], zmmb_w);
+					h_zmm_ljet->Fill(Z, ljets[0], zmmb_w);
 					h_zmm_ljet->FillMet(*MET_pt, *PuppiMET_pt, zmmb_w);
 				}
+
 
 				// if we have at least one b-jet
 				if (bjets.size() >= 1)
@@ -402,6 +414,8 @@ Bool_t ZxSelector::Process(Long64_t entry)
 		}//end-muon-cut
 	}//end-muon-trigger
 
+	//std::cout << "Made it past the muon trigger" << std::endl;
+
 	return kTRUE;
 }
 
@@ -416,7 +430,7 @@ void ZxSelector::SlaveTerminate()
 void ZxSelector::Terminate()
 {
 	// Get the file for output
-	TFile *f = new TFile("results/out.root", "RECREATE");
+	TFile *f = new TFile("results/out.root", "UPDATE");
 
    	// Take the elements we have from processing and print them out.
 	for (auto obj : *GetOutputList())

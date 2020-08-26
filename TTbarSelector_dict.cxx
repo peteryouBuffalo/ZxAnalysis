@@ -55,7 +55,7 @@ namespace ROOT {
       ::TTbarSelector *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TInstrumentedIsAProxy< ::TTbarSelector >(0);
       static ::ROOT::TGenericClassInfo 
-         instance("TTbarSelector", ::TTbarSelector::Class_Version(), "src/TTbarSelector.h", 22,
+         instance("TTbarSelector", ::TTbarSelector::Class_Version(), "src/TTbarSelector.h", 25,
                   typeid(::TTbarSelector), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &::TTbarSelector::Dictionary, isa_proxy, 16,
                   sizeof(::TTbarSelector) );

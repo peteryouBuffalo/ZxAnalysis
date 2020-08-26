@@ -1452,6 +1452,8 @@ public :
 
 private:
 
+	int TotalEvent = 0;
+	
 	// Histograms
 	ZbPlots* h_zee_jet;		// Z mass from e+e- (all jet)
 	ZbPlots* h_zmm_jet;		// Z mass from mu+mu- (all jet)

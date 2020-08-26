@@ -16,6 +16,9 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 
+#include "TH1.h"
+#include "Plots.cxx"
+
 // Headers needed by this particular selector
 
 
@@ -1591,6 +1594,13 @@ public :
    virtual void    Terminate();
 
    ClassDef(TTbarSelector,0);
+
+private:
+
+	int TotalEvent = 0;
+
+	// Histograms
+	ZbPlots* h_ttbar_jet;
 
 };
 
