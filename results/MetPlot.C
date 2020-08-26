@@ -1,8 +1,4 @@
 #include <string>
-#include <TFile.h>
-#include <TH1D.h>
-#include <THStack.h>
-#include <TLegend.h>
 
 void MetPlot(std::string file)
 {
@@ -14,6 +10,8 @@ void MetPlot(std::string file)
 	TFile *f = new TFile(file.c_str(), "UPDATE");
 
 	// Get the proper data from histograms
+	
+	std::cout << "Getting the data from the ROOT file..." << std::endl;
 	TH1D* h_ttbar = (TH1D*)f->Get("TTbar_jet_met");
 	h_ttbar->SetFillColor(kYellow);	
 
@@ -33,22 +31,35 @@ void MetPlot(std::string file)
 	h_zmm_cJet->SetFillColor(kBlue+1);
 
 	// Let's now combine these into a proper THStack
-	THStack *hstack = new THStack("MET_Stack", "");
+	std::cout << "Stacking the histograms..." << std::endl;
+	THStack hstack("MET_Stack", "");
 
-	TLegend *l = new TLegend(0.76, 0.95-0.8*7/20., 1.0, 0.95);
+	TLegend *l = new TLegend(0.76, 0.95-0.08*7/20., 1.0, 0.95);
 	l->SetFillStyle(1001);
 	l->SetFillColor(kWhite);
 	l->SetLineColor(kWhite);
 
-	hstack->Add(h_ttbar); l->AddEntry(h_ttbar, "Ttbar", "f");
-	hstack->Add(h_zee_lJet); l->AddEntry(h_zee_lJet, "Z+l (elec)", "f");
-	hstack->Add(h_zmm_lJet); l->AddEntry(h_zmm_lJet, "Z+l (muon)", "f");
-	hstack->Add(h_zee_bJet); l->AddEntry(h_zee_bJet, "Z+b (elec)", "f");
-	hstack->Add(h_zmm_bJet); l->AddEntry(h_zmm_bJet, "Z+b (muon)", "f");
-	hstack->Add(h_zee_cJet); l->AddEntry(h_zee_cJet, "Z+c (elec)", "f");
-	hstack->Add(h_zmm_cJet); l->AddEntry(h_zmm_cJet, "Z+c (muon)", "f");
+	std::cout << "Adding background (ttbar)..." << std::endl;
+	hstack.Add(h_ttbar); l->AddEntry(h_ttbar, "Ttbar", "f");
+	std::cout << "Adding Z+l-jets..." << std::endl;
+	hstack.Add(h_zee_lJet); l->AddEntry(h_zee_lJet, "Z+l (elec)", "f");
+	hstack.Add(h_zmm_lJet); l->AddEntry(h_zmm_lJet, "Z+l (muon)", "f");
+	std::cout << "Adding Z+b-jets..." << std::endl;
+	hstack.Add(h_zee_bJet); l->AddEntry(h_zee_bJet, "Z+b (elec)", "f");
+	hstack.Add(h_zmm_bJet); l->AddEntry(h_zmm_bJet, "Z+b (muon)", "f");
+	std::cout << "Adding Z+c-jets..." << std::endl;
+	hstack.Add(h_zee_cJet); l->AddEntry(h_zee_cJet, "Z+c (elec)", "f");
+	hstack.Add(h_zmm_cJet); l->AddEntry(h_zmm_cJet, "Z+c (muon)", "f");
 
-	hstack->Write(); f->Close(); delete f;	
+	// Now, let's put this all into a final file
+	std::cout << "Outputting to plots.root..." << std::endl;
+	TFile *f2 = new TFile("plots.root", "RECREATE");
+	TCanvas* c = new TCanvas("MET_Stack", "", 800, 600);
+	c->SetLogy(true);
+	hstack.Draw("hist"); l->Draw("same");
 
-	hstack->Draw();	
+	c->Write(); f2->Close(); delete f2;
+	f->Close(); delete f;
+	std::cout << "[END PROGRAM]" << std::endl;
 }
+
