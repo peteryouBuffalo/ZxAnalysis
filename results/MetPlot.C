@@ -40,11 +40,109 @@ void MetPlot(std::string file)
 	h_zmm_cJet->SetFillColor(kBlue+1);
 	h_zmm_cJet->Scale(L_ttbar / (h_zmm_cJet->GetEntries()/(1.271e-06*0.119)));
 
+	// Let's create the ROC curves.
+	Double_t cuts[22];
+	Double_t lEff[22], bEff[22], cEff[22], tEff[22];
+	for (int i = 0; i < 22; ++i)
+	{
+		// Calculate the i'th cut
+		cuts[i] = i*5;
+
+		// Determine efficiency for ttbar at the i'th cut
+		Double_t tot = 0., sel = 0.;
+		for (int b = 0; b < h_ttbar->GetSize(); ++b)
+		{
+			if (h_ttbar->GetBinCenter(b) < cuts[i])
+				sel += h_ttbar->GetBinContent(b);
+			tot += h_ttbar->GetBinContent(b);		
+		}
+		tEff[i] = sel/tot;
+
+		// Determine efficiency for Z+l at the i'th cut
+		tot = 0.; sel = 0.;
+		for (int b = 0; b < h_zee_lJet->GetSize(); ++b)
+		{
+			if (h_zee_lJet->GetBinCenter(b) < cuts[i])
+				sel += h_zee_lJet->GetBinContent(b);
+			tot += h_zee_lJet->GetBinContent(b);
+		}
+		for (int b = 0; b < h_zmm_lJet->GetSize(); ++b)
+		{
+			if (h_zmm_lJet->GetBinCenter(b) < cuts[i])
+				sel += h_zmm_lJet->GetBinContent(b);
+			tot += h_zmm_lJet->GetBinContent(b);
+		}
+		lEff[i] = sel/tot;
+
+		// Determine efficiency for Z+b at the i'th cut
+		tot = 0.; sel = 0.;
+		for (int b = 0; b < h_zee_bJet->GetSize(); ++b)
+		{
+			if (h_zee_bJet->GetBinCenter(b) < cuts[i])
+				sel += h_zee_bJet->GetBinContent(b);
+			tot += h_zee_bJet->GetBinContent(b);
+		}
+		for (int b = 0; b < h_zmm_bJet->GetSize(); ++b)
+		{
+			if (h_zmm_bJet->GetBinCenter(b) < cuts[i])
+				sel += h_zmm_bJet->GetBinContent(b);
+			tot += h_zmm_bJet->GetBinContent(b);
+		}
+		bEff[i] = sel/tot;
+
+		// Determine efficiency for Z+c at the i'th cut
+		tot = 0.; sel = 0.;
+		for (int b = 0; b < h_zee_cJet->GetSize(); ++b)
+		{
+			if (h_zee_cJet->GetBinCenter(b) < cuts[i])
+				sel += h_zee_cJet->GetBinContent(b);
+			tot += h_zee_cJet->GetBinContent(b);
+		}
+		for (int b = 0; b < h_zmm_cJet->GetSize(); ++b)
+		{
+			if (h_zmm_cJet->GetBinCenter(b) < cuts[i])
+				sel += h_zmm_cJet->GetBinContent(b);
+			tot += h_zmm_cJet->GetBinContent(b);
+		}
+		cEff[i] = sel/tot;
+	}
+
+	// Now let's put our efficiencies into a plot.
+	TGraph* gr_lJet = new TGraph(22, tEff, lEff);
+	gr_lJet->SetLineColor(kGreen);
+
+	TGraph* gr_bJet = new TGraph(22, tEff, bEff);
+	gr_bJet->SetLineColor(kRed);
+
+	TGraph* gr_cJet = new TGraph(22, tEff, cEff);
+	gr_cJet->SetLineColor(kBlue);
+
+	for (int j = 0; j < 22; ++j)
+	{
+		Double_t y = gr_lJet->GetY()[j] + 0.01;
+		TLatex *lt = new TLatex(gr_lJet->GetX()[j], y, Form("%.1f", cuts[j]));
+		lt->SetTextSize(0.02);
+		gr_lJet->GetListOfFunctions()->Add(lt);
+	}
+
+	TMultiGraph *mg = new TMultiGraph("ROC_Curve", "");
+	mg->GetXaxis()->SetTitle("ttbar Selection Eff.");
+	mg->GetYaxis()->SetTitle("Z+j Selection Eff.");
+
+	TLegend *leg = new TLegend(0.68, 0.72, 0.98, 0.92);
+	mg->Add(gr_lJet, "c*"); leg->AddEntry(gr_lJet, "Z+l", "f");
+	mg->Add(gr_bJet, "c*"); leg->AddEntry(gr_bJet, "Z+b", "f");
+	mg->Add(gr_cJet, "c*"); leg->AddEntry(gr_cJet, "Z+c", "f");
+	
+	TCanvas *cs = new TCanvas("ROC_curve", "", 10, 10, 700, 900);
+	mg->Draw("ac*"); leg->Draw(); cs->SetGrid();
+	gPad->Update(); gPad->Modified();
+
 	// Let's now combine these into a proper THStack
 	std::cout << "Stacking the histograms..." << std::endl;
 	THStack hstack("MET_Stack", "");
 
-	TLegend *l = new TLegend(0.76, 0.95-0.08*7/20., 1.0, 0.95);
+	TLegend *l = new TLegend(0.76, 0.95-0.8*7/20., 1.0, 0.95);
 	l->SetFillStyle(1001);
 	l->SetFillColor(kWhite);
 	l->SetLineColor(kWhite);
@@ -68,7 +166,7 @@ void MetPlot(std::string file)
 	c->SetLogy(true);
 	hstack.Draw("hist"); l->Draw("same");
 
-	c->Write(); f2->Close(); delete f2;
+	c->Write(); cs->Write(); f2->Close(); delete f2;
 	f->Close(); delete f;
 	std::cout << "[END PROGRAM]" << std::endl;
 }
