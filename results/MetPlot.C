@@ -12,31 +12,31 @@ void MetPlot(std::string file)
 	// Get the proper data from histograms
 	
 	std::cout << "Getting the data from the ROOT file..." << std::endl;
-	TH1D* h_ttbar = (TH1D*)f->Get("TTbar_jet_met");
+	TH1D* h_ttbar = (TH1D*)f->Get("TTbar_jet_met_puppi");
 	h_ttbar->SetFillColor(kYellow);	
 	double L_ttbar = h_ttbar->GetEntries()/8.794e-08;
 
-	TH1D* h_zee_lJet = (TH1D*)f->Get("Zee_ljet_met");
+	TH1D* h_zee_lJet = (TH1D*)f->Get("Zee_ljet_met_puppi");
 	h_zee_lJet->SetFillColor(kGreen);
 	h_zee_lJet->Scale(L_ttbar / (h_zee_lJet->GetEntries()/(1.271e-06*0.427)));
 
-	TH1D* h_zmm_lJet = (TH1D*)f->Get("Zmm_ljet_met");
+	TH1D* h_zmm_lJet = (TH1D*)f->Get("Zmm_ljet_met_puppi");
 	h_zmm_lJet->SetFillColor(kGreen+1);	
 	h_zmm_lJet->Scale(L_ttbar / (h_zmm_lJet->GetEntries()/(1.271e-06*0.427)));
 
-	TH1D* h_zee_bJet = (TH1D*)f->Get("Zee_bjet_met");
+	TH1D* h_zee_bJet = (TH1D*)f->Get("Zee_bjet_met_puppi");
 	h_zee_bJet->SetFillColor(kRed);
 	h_zee_bJet->Scale(L_ttbar / (h_zee_bJet->GetEntries()/(1.271e-06*0.152)));
 
-	TH1D* h_zmm_bJet = (TH1D*)f->Get("Zmm_bjet_met");
+	TH1D* h_zmm_bJet = (TH1D*)f->Get("Zmm_bjet_met_puppi");
 	h_zmm_bJet->SetFillColor(kRed+1);
 	h_zmm_bJet->Scale(L_ttbar / (h_zmm_bJet->GetEntries()/(1.271e-06*0.152)));
 
-	TH1D* h_zee_cJet = (TH1D*)f->Get("Zee_cjet_met");
+	TH1D* h_zee_cJet = (TH1D*)f->Get("Zee_cjet_met_puppi");
 	h_zee_cJet->SetFillColor(kBlue);
 	h_zee_cJet->Scale(L_ttbar / (h_zee_cJet->GetEntries()/(1.271e-06*0.119)));
 
-	TH1D* h_zmm_cJet = (TH1D*)f->Get("Zmm_cjet_met");
+	TH1D* h_zmm_cJet = (TH1D*)f->Get("Zmm_cjet_met_puppi");
 	h_zmm_cJet->SetFillColor(kBlue+1);
 	h_zmm_cJet->Scale(L_ttbar / (h_zmm_cJet->GetEntries()/(1.271e-06*0.119)));
 
@@ -161,7 +161,7 @@ void MetPlot(std::string file)
 
 	// Now, let's put this all into a final file
 	std::cout << "Outputting to plots.root..." << std::endl;
-	TFile *f2 = new TFile("plots.root", "RECREATE");
+	TFile *f2 = new TFile("plots_puppi.root", "RECREATE");
 	TCanvas* c = new TCanvas("MET_Stack", "", 800, 600);
 	c->SetLogy(true);
 	hstack.Draw("hist"); l->Draw("same");
